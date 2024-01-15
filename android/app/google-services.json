@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "464514899672",
+    "project_id": "patientdoctorapp-vignesh",
+    "storage_bucket": "patientdoctorapp-vignesh.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:464514899672:android:2226395b4ed04c7143c1ad",
+        "android_client_info": {
+          "package_name": "com.patientdoc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPmAT-5nd_gcl0UtzEy7KpNmJiMPOKS4U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
