@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
+import auth from '@react-native-firebase/auth';
 
 const SignupScreen = ({navigation}) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -23,10 +24,31 @@ const SignupScreen = ({navigation}) => {
     setModalVisible(!isModalVisible);
   };
 
-  const handleSignup = () => {
-    // Perform signup logic here based on userType and form fields
-    Alert.alert('Signup Successful');
-    navigation.navigate('LoginScreen');
+  const handleSignup = async data => {
+    try {
+      console.log('Signup pressed');
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        email,
+        password,
+      );
+      console.log('User Account Created!');
+
+      await userCredential.user.updateProfile({
+        displayName: name + '=' + selectedUserType,
+      });
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        setError('email', {
+          type: 'manual',
+          message: 'Email address is already in use.',
+        });
+      } else if (error.code === 'auth/invalid-email') {
+        setError('email', {type: 'manual', message: 'Invalid email address.'});
+      } else {
+        console.log('Unexpected error during signup: ', error);
+        Alert.alert('An unexpected error occurred during signup.');
+      }
+    }
   };
 
   const handleLogin = () => {

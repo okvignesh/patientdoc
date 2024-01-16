@@ -6,13 +6,23 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 const LoginScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    navigation.navigate('DashboardScreen');
+  const handleLogin = async data => {
+    try {
+      const response = await auth().signInWithEmailAndPassword(email, password);
+      console.log('User Logged in successfully!', response?.user);
+      // navigation.navigate('ProfileScreen', response?.user?.displayName);
+    } catch (error) {
+      if (error.code === 'auth/invalid-email') {
+        setError('email', {type: 'manual', message: 'Invalid email address'});
+      }
+      console.error(error);
+    }
   };
 
   const navigateToSignup = () => {
