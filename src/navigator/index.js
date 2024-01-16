@@ -12,7 +12,12 @@ import {
 } from '../screens';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import {createDrawerNavigator} from '@react-navigation/drawer';
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItemList,
+  DrawerItem,
+} from '@react-navigation/drawer';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -91,10 +96,16 @@ const Navigator = () => {
 
   const DrawerNav = () => {
     return (
-      // <Stack.Navigator>
-      //   <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
-      // </Stack.Navigator>
-      <Drawer.Navigator>
+      <Drawer.Navigator
+        screenOptions={{
+          headerShown: true,
+        }}
+        drawerContent={props => (
+          <DrawerContentScrollView {...props}>
+            <DrawerItemList {...props} />
+            <DrawerItem label="Logout" onPress={handleLogout} />
+          </DrawerContentScrollView>
+        )}>
         <Drawer.Screen name="UserProfile" component={UserProfile} />
         <Drawer.Screen
           name="UpcomingAppointments"
