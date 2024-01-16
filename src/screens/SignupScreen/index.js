@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const SignupScreen = ({navigation}) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -32,6 +33,18 @@ const SignupScreen = ({navigation}) => {
         password,
       );
       console.log('User Account Created!');
+
+      const userObject = {
+        uid: userCredential.user.uid,
+        name,
+        email,
+        contact,
+        userType: selectedUserType,
+        location,
+        speciality,
+      };
+
+      await firestore().collection('UserProfile').add(userObject);
 
       await userCredential.user.updateProfile({
         displayName: name + '=' + selectedUserType,
@@ -117,6 +130,13 @@ const SignupScreen = ({navigation}) => {
           </TouchableOpacity>
         </View>
       </Modal>
+
+      <TextInput
+        testID="user_type_input"
+        style={styles.input}
+        value={selectedUserType}
+        editable={false}
+      />
 
       <TextInput
         testID="signup_name_input"

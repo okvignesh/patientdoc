@@ -32,7 +32,7 @@ const LoginScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <Text testID="welcome" style={styles.title}>
-        welcome
+        Welcome!
       </Text>
       <Text testID="initial_login_title" style={styles.title}>
         Login
