@@ -32,10 +32,16 @@ const CreateAppointment = () => {
 
   const searchDoctors = async () => {
     try {
+      // const doctorsRef = firestore().collection('UserProfile');
+      // const query = doctorsRef
+      //   .where('userType', '==', 'doctor')
+      //   .where('speciality', '==', searchText);
+
       const doctorsRef = firestore().collection('UserProfile');
       const query = doctorsRef
         .where('userType', '==', 'doctor')
-        .where('speciality', '==', searchText);
+        .where('speciality', '>=', searchText) // Check if 'speciality' is greater than or equal to searchText
+        .where('speciality', '<=', searchText + '\uf8ff'); // Check if 'speciality' is less than or equal to searchText + '\uf8ff'
 
       const results = await query.get();
 
@@ -52,12 +58,14 @@ const CreateAppointment = () => {
   const requestAppointment = async () => {
     try {
       const userId = auth().currentUser.uid;
+      const patientName = auth().currentUser.displayName;
       const appointmentRef = firestore().collection('Appointment');
 
       // Add the appointment record
       await appointmentRef.add({
-        doctorId: selectedDoctor.id,
+        doctorId: selectedDoctor.uid,
         patientId: userId,
+        patientName,
         appmtDate,
         appmtTime,
         customMessage,
