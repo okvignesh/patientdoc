@@ -66,6 +66,7 @@ const CreateAppointment = () => {
         doctorId: selectedDoctor.uid,
         patientId: userId,
         patientName,
+        doctorName: selectedDoctor.name,
         appmtDate,
         appmtTime,
         customMessage,
