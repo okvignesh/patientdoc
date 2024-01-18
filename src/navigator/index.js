@@ -94,6 +94,55 @@ const Navigator = () => {
     }
   };
 
+  // const DrawerNav = () => {
+  //   return (
+  //     <Drawer.Navigator
+  //       screenOptions={{
+  //         headerShown: true,
+  //       }}
+  //       drawerContent={props => (
+  //         <DrawerContentScrollView {...props}>
+  //           <DrawerItemList {...props} />
+  //           <DrawerItem label="Logout" onPress={handleLogout} />
+  //         </DrawerContentScrollView>
+  //       )}>
+  //       <Drawer.Screen
+  //         name="UserProfile"
+  //         component={UserProfile}
+  //         initialParams={{ userType: userType }} // Pass userType as a parameter
+  //       />
+  //       <Drawer.Screen
+  //         name="UpcomingAppointments"
+  //         component={UpcomingAppointments}
+  //         initialParams={{ userType: userType }} // Pass userType as a parameter
+  //       />
+  //       <Drawer.Screen
+  //         name="AppointmentHistory"
+  //         component={AppointmentHistory}
+  //         initialParams={{ userType: userType }} // Pass userType as a parameter
+  //       />
+  //       {userType === 'doctor' && (
+  //         <>
+  //           <Drawer.Screen
+  //             name="ManageAppointments"
+  //             component={ManageAppointments}
+  //             initialParams={{ userType: userType }} // Pass userType as a parameter
+  //           />
+  //         </>
+  //       )}
+  //       {userType === 'patient' && (
+  //         <>
+  //           <Drawer.Screen
+  //             name="CreateAppointment"
+  //             component={CreateAppointment}
+  //             initialParams={{ userType: userType }} // Pass userType as a parameter
+  //           />
+  //         </>
+  //       )}
+  //     </Drawer.Navigator>
+  //   );
+  // };
+
   const DrawerNav = () => {
     return (
       <Drawer.Navigator
@@ -110,6 +159,7 @@ const Navigator = () => {
         <Drawer.Screen
           name="UpcomingAppointments"
           component={UpcomingAppointments}
+          initialParams={{userType: userType}} // Pass userType as a parameter
         />
         <Drawer.Screen
           name="AppointmentHistory"
