@@ -47,7 +47,7 @@ const SignupScreen = ({navigation}) => {
       await firestore().collection('UserProfile').add(userObject);
 
       await userCredential.user.updateProfile({
-        displayName: name + '=' + selectedUserType,
+        displayName: name,
       });
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {

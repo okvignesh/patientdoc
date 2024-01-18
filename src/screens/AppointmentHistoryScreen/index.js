@@ -1,14 +1,90 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useState, useEffect} from 'react';
+import {View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import firestore from '@react-native-firebase/firestore';
 
 const AppointmentHistory = () => {
+  const [appointments, setAppointments] = useState([]);
+
+  useEffect(() => {
+    // Fetch all appointments from Firestore
+    const fetchAppointments = async () => {
+      try {
+        const appointmentsRef = firestore().collection('Appointment');
+        const snapshot = await appointmentsRef.get();
+
+        const appointmentData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setAppointments(appointmentData);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  const renderAppointmentItem = ({item}) => (
+    <TouchableOpacity style={styles.appointmentItem}>
+      <Text style={styles.patientName}>{item.patientName}</Text>
+      <Text style={styles.doctorName}>{item.doctorName}</Text>
+      <Text
+        style={styles.dateTime}>{`${item.appmtDate} ${item.appmtTime}`}</Text>
+      <Text style={styles.customMessage}>{item.customMessage}</Text>
+      <Text style={styles.status}>{item.status}</Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <View>
-      <Text>AppointmentHistory</Text>
+    <View style={styles.container}>
+      <FlatList
+        data={appointments}
+        keyExtractor={item => item.id}
+        renderItem={renderAppointmentItem}
+        ListEmptyComponent={<Text>No appointments found</Text>}
+      />
     </View>
   );
 };
 
-export default AppointmentHistory;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f8f8',
+  },
+  appointmentItem: {
+    width: '80%',
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+  },
+  patientName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  doctorName: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  dateTime: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  customMessage: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  status: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#27ae60', // Green color for status
+  },
+});
 
-const styles = StyleSheet.create({});
+export default AppointmentHistory;
