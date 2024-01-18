@@ -32,28 +32,57 @@ const CreateAppointment = () => {
 
   const searchDoctors = async () => {
     try {
-      // const doctorsRef = firestore().collection('UserProfile');
-      // const query = doctorsRef
-      //   .where('userType', '==', 'doctor')
-      //   .where('speciality', '==', searchText);
-
       const doctorsRef = firestore().collection('UserProfile');
-      const query = doctorsRef
-        .where('userType', '==', 'doctor')
-        .where('speciality', '>=', searchText) // Check if 'speciality' is greater than or equal to searchText
-        .where('speciality', '<=', searchText + '\uf8ff'); // Check if 'speciality' is less than or equal to searchText + '\uf8ff'
+      let query = doctorsRef.where('userType', '==', 'doctor');
+
+      if (searchText.length >= 1 && searchText.trim() !== '') {
+        // Check if 'speciality' starts with, contains, or equals searchText
+        query = query
+          .where('speciality', '>=', searchText)
+          .where('speciality', '<=', searchText + '\uf8ff');
+      } else {
+        // No searchText, return empty results
+        setSearchResults([]);
+        return;
+      }
 
       const results = await query.get();
 
-      const doctors = results.docs.map(doc => {
-        return {id: doc.id, ...doc.data()};
-      });
+      const doctors = results.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
       setSearchResults(doctors);
     } catch (error) {
       console.error('Error searching for doctors:', error);
     }
   };
+
+  // const searchDoctors = async () => {
+  //   try {
+  //     // const doctorsRef = firestore().collection('UserProfile');
+  //     // const query = doctorsRef
+  //     //   .where('userType', '==', 'doctor')
+  //     //   .where('speciality', '==', searchText);
+
+  //     const doctorsRef = firestore().collection('UserProfile');
+  //     const query = doctorsRef
+  //       .where('userType', '==', 'doctor')
+  //       .where('speciality', '>=', searchText) // Check if 'speciality' is greater than or equal to searchText
+  //       .where('speciality', '<=', searchText + '\uf8ff'); // Check if 'speciality' is less than or equal to searchText + '\uf8ff'
+
+  //     const results = await query.get();
+
+  //     const doctors = results.docs.map(doc => {
+  //       return {id: doc.id, ...doc.data()};
+  //     });
+
+  //     setSearchResults(doctors);
+  //   } catch (error) {
+  //     console.error('Error searching for doctors:', error);
+  //   }
+  // };
 
   const requestAppointment = async () => {
     try {
@@ -91,7 +120,10 @@ const CreateAppointment = () => {
       <Text style={styles.doctorDetails}>{item.contact}</Text>
       <TouchableOpacity
         style={styles.appointmentButton}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => {
+          setSelectedDoctor(item);
+          setModalVisible(true);
+        }}>
         <Text style={styles.buttonText}>Request Appointment</Text>
       </TouchableOpacity>
     </TouchableOpacity>
@@ -99,6 +131,7 @@ const CreateAppointment = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.label}>Search for Doctors</Text>
       <TextInput
         style={styles.searchInput}
         placeholder="Search by Speciality"
@@ -198,6 +231,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
   modalContainer: {
     flex: 1,
