@@ -159,11 +159,12 @@ const Navigator = () => {
         <Drawer.Screen
           name="UpcomingAppointments"
           component={UpcomingAppointments}
-          initialParams={{userType: userType}} // Pass userType as a parameter
+          initialParams={{userType: userType}} // Passing userType as a parameter
         />
         <Drawer.Screen
           name="AppointmentHistory"
           component={AppointmentHistory}
+          initialParams={{userType: userType}} // Passing userType as a parameter
         />
         {userType === 'doctor' && (
           <>

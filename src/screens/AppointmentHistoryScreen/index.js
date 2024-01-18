@@ -1,30 +1,45 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
-const AppointmentHistory = () => {
+const AppointmentHistory = ({route}) => {
   const [appointments, setAppointments] = useState([]);
+  const userType = route.params.userType; // Assuming 'doctor' or 'patient'
 
   useEffect(() => {
-    // Fetch all appointments from Firestore
-    const fetchAppointments = async () => {
+    const user = auth().currentUser;
+
+    const fetchData = async () => {
       try {
-        const appointmentsRef = firestore().collection('Appointment');
-        const snapshot = await appointmentsRef.get();
+        if (user) {
+          const userId = user.uid;
+          const fieldName = userType === 'doctor' ? 'doctorId' : 'patientId';
+          const appointmentsRef = firestore().collection('Appointment');
 
-        const appointmentData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+          // Set up a real-time listener
+          const unsubscribe = appointmentsRef
+            .where(fieldName, '==', userId)
+            .onSnapshot(snapshot => {
+              const appointmentData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+              }));
+              setAppointments(appointmentData);
+            });
 
-        setAppointments(appointmentData);
+          // Return the unsubscribe function to clean up the listener when the component unmounts
+          return () => unsubscribe();
+        }
       } catch (error) {
         console.error('Error fetching appointments:', error);
       }
     };
 
-    fetchAppointments();
-  }, []);
+    fetchData();
+
+    // Specify the dependencies for the effect
+  }, [userType]);
 
   const renderAppointmentItem = ({item}) => (
     <TouchableOpacity style={styles.appointmentItem}>
