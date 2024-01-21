@@ -9,15 +9,15 @@ import {
   StatusBar,
   StyleSheet,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
 
-const LoginScreen = () => {
-  const navigation = useNavigation();
+const LoginScreen = ({navigation}) => {
   const fadeInUp = useSharedValue(0);
 
   fadeInUp.value = withSpring(1, {damping: 10, stiffness: 80});
@@ -34,7 +34,6 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      // Your login logic here
       await auth().signInWithEmailAndPassword(email, password);
       console.log('User Logged in successfully!');
       // navigation.navigate('ProfileScreen');
@@ -66,6 +65,7 @@ const LoginScreen = () => {
 
         <TextInput
           style={styles.input}
+          autoCapitalize="none"
           placeholder="Enter your email"
           onChangeText={text => setEmail(text)}
           value={email}
@@ -73,6 +73,7 @@ const LoginScreen = () => {
 
         <TextInput
           style={styles.input}
+          autoCapitalize="none"
           placeholder="Enter your password"
           secureTextEntry
           onChangeText={text => setPassword(text)}
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
   },
   signupText: {
     color: '#3498db',
-    fontSize: 14,
+    fontSize: 17,
   },
 });
 

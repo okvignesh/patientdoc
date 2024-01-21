@@ -194,7 +194,11 @@ const Navigator = () => {
           component={LoginScreen}
           options={{headerShown: false}}
         />
-        <Stack.Screen name="SignupScreen" component={SignupScreen} />
+        <Stack.Screen
+          name="SignupScreen"
+          component={SignupScreen}
+          options={{headerShown: false}}
+        />
       </Stack.Navigator>
     );
   };
