@@ -4,23 +4,41 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Image,
+  ImageBackground,
+  StatusBar,
   StyleSheet,
 } from 'react-native';
-import auth from '@react-native-firebase/auth';
+import {useNavigation} from '@react-navigation/native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = () => {
+  const navigation = useNavigation();
+  const fadeInUp = useSharedValue(0);
+
+  fadeInUp.value = withSpring(1, {damping: 10, stiffness: 80});
+
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    return {
+      opacity: fadeInUp.value,
+      transform: [{translateY: fadeInUp.value * 100}],
+    };
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async data => {
+  const handleLogin = async () => {
     try {
-      const response = await auth().signInWithEmailAndPassword(email, password);
-      console.log('User Logged in successfully!', response?.user);
-      // navigation.navigate('ProfileScreen', response?.user?.displayName);
+      // Your login logic here
+      await auth().signInWithEmailAndPassword(email, password);
+      console.log('User Logged in successfully!');
+      // navigation.navigate('ProfileScreen');
     } catch (error) {
-      if (error.code === 'auth/invalid-email') {
-        setError('email', {type: 'manual', message: 'Invalid email address'});
-      }
       console.error(error);
     }
   };
@@ -30,43 +48,46 @@ const LoginScreen = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text testID="welcome" style={styles.title}>
-        Welcome!
-      </Text>
-      <Text testID="initial_login_title" style={styles.title}>
-        Login
-      </Text>
-
-      <TextInput
-        testID="email_input"
-        autoCapitalize="none"
-        style={styles.input}
-        placeholder="Enter your email"
-        onChangeText={text => setEmail(text)}
-        value={email}
+    <ImageBackground
+      source={require('../../../assets/images/background.png')}
+      style={styles.container}>
+      <StatusBar style="light" />
+      <Image
+        source={require('../../../assets/images/light.png')}
+        style={styles.lightImageLeft}
       />
-
-      <TextInput
-        testID="password_input"
-        style={styles.input}
-        placeholder="Enter your password"
-        secureTextEntry
-        onChangeText={text => setPassword(text)}
-        value={password}
+      <Image
+        source={require('../../../assets/images/light.png')}
+        style={styles.lightImageRight}
       />
+      <Text style={styles.welcomeText}>Welcome to DocConnect!</Text>
+      <Animated.View style={[animatedContainerStyle, styles.animatedContainer]}>
+        <Text style={styles.loginText}>Login</Text>
 
-      <TouchableOpacity
-        testID="login_button"
-        style={styles.button}
-        onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your email"
+          onChangeText={text => setEmail(text)}
+          value={email}
+        />
 
-      <TouchableOpacity testID="signup_button" onPress={navigateToSignup}>
-        <Text style={styles.signupText}>No Account? Signup now !</Text>
-      </TouchableOpacity>
-    </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          secureTextEntry
+          onChangeText={text => setPassword(text)}
+          value={password}
+        />
+
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.loginButtonText}>Login</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={navigateToSignup}>
+          <Text style={styles.signupText}>No Account? Signup now!</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    </ImageBackground>
   );
 };
 
@@ -75,10 +96,39 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
   },
-  title: {
+  lightImageLeft: {
+    position: 'absolute',
+    top: 10,
+    left: 20,
+    height: 225,
+    width: 90,
+  },
+  lightImageRight: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    height: 160,
+    width: 65,
+    opacity: 0.75,
+  },
+  welcomeText: {
+    color: '#104692',
     fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    position: 'absolute',
+    top: '40%', // Adjust the top position as needed
+  },
+  animatedContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+    width: '100%',
+  },
+  loginText: {
+    color: '#0c6cb9',
+    fontSize: 25,
     fontWeight: 'bold',
     marginBottom: 16,
   },
@@ -90,14 +140,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 16,
+    backgroundColor: 'rgba(255,255,255,0.5)',
   },
-  button: {
-    backgroundColor: '#3498db',
+  loginButton: {
+    backgroundColor: '#27ae60',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
+    marginBottom: 16,
   },
-  buttonText: {
+  loginButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
@@ -105,43 +157,6 @@ const styles = StyleSheet.create({
   signupText: {
     color: '#3498db',
     fontSize: 14,
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 14,
-  },
-  languageButton: {
-    padding: 10,
-    borderBottomColor: '#dddddd',
-    borderBottomWidth: 1,
-  },
-  buttonText2: {
-    color: 'white',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  langName: {
-    fontSize: 16,
-    color: 'white',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#54afd8',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-  },
-  cancelButton: {
-    marginTop: 20,
-    backgroundColor: '#E23f2c',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
   },
 });
 
