@@ -6,6 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Modal,
+  FlatList,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -17,10 +19,24 @@ const UserProfile = () => {
     location: '',
     name: '',
     speciality: '',
-    qualification: '',
-    experience: '',
     userType: '',
   });
+
+  const [qualificationModalVisible, setQualificationModalVisible] =
+    useState(false);
+  const [experienceModalVisible, setExperienceModalVisible] = useState(false);
+
+  const [degreeName, setDegreeName] = useState('');
+  const [institute, setInstitute] = useState('');
+  const [passingYear, setPassingYear] = useState('');
+
+  const [clinic, setClinic] = useState('');
+  const [startYear, setStartYear] = useState('');
+  const [endYear, setEndYear] = useState('');
+  const [description, setDescription] = useState('');
+
+  const [qualifications, setQualifications] = useState([]);
+  const [experiences, setExperiences] = useState([]);
 
   useEffect(() => {
     // Fetch user profile information from Firestore
@@ -39,7 +55,48 @@ const UserProfile = () => {
       }
     };
 
+    // Fetch qualifications and experiences
+    const fetchQualifications = async () => {
+      try {
+        const uid = auth().currentUser.uid;
+        const qualificationRef = firestore()
+          .collection('Qualification')
+          .where('uid', '==', uid);
+
+        qualificationRef.onSnapshot(querySnapshot => {
+          const data = [];
+          querySnapshot.forEach(doc => {
+            data.push(doc.data());
+          });
+          setQualifications(data);
+        });
+      } catch (error) {
+        console.error('Error fetching qualifications:', error);
+      }
+    };
+
+    const fetchExperiences = async () => {
+      try {
+        const uid = auth().currentUser.uid;
+        const experienceRef = firestore()
+          .collection('Experience')
+          .where('uid', '==', uid);
+
+        experienceRef.onSnapshot(querySnapshot => {
+          const data = [];
+          querySnapshot.forEach(doc => {
+            data.push(doc.data());
+          });
+          setExperiences(data);
+        });
+      } catch (error) {
+        console.error('Error fetching experiences:', error);
+      }
+    };
+
     fetchUserProfile();
+    fetchQualifications();
+    fetchExperiences();
   }, []);
 
   const handleSaveProfile = async () => {
@@ -64,8 +121,6 @@ const UserProfile = () => {
           contact: userProfile.contact,
           location: userProfile.location,
           speciality: userProfile.speciality,
-          qualification: userProfile.qualification,
-          experience: userProfile.experience,
         });
       }
 
@@ -75,96 +130,238 @@ const UserProfile = () => {
     }
   };
 
+  const handleAddQualification = async () => {
+    try {
+      const uid = auth().currentUser.uid;
+      await firestore().collection('Qualification').add({
+        uid,
+        degreeName,
+        institute,
+        passingYear,
+      });
+      setQualificationModalVisible(false);
+    } catch (error) {
+      console.error('Error adding qualification:', error);
+    }
+  };
+
+  const handleAddExperience = async () => {
+    try {
+      const uid = auth().currentUser.uid;
+      await firestore().collection('Experience').add({
+        uid,
+        clinic,
+        startYear,
+        endYear,
+        description,
+      });
+      setExperienceModalVisible(false);
+    } catch (error) {
+      console.error('Error adding experience:', error);
+    }
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.heading}>User Profile</Text>
+    <View contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.heading}>User Profile</Text>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your name"
-          value={userProfile.name}
-          onChangeText={text => setUserProfile({...userProfile, name: text})}
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your name"
+            value={userProfile.name}
+            onChangeText={text => setUserProfile({...userProfile, name: text})}
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your email"
-          value={userProfile.email}
-          onChangeText={text => setUserProfile({...userProfile, email: text})}
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            value={userProfile.email}
+            onChangeText={text => setUserProfile({...userProfile, email: text})}
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Contact</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your contact number"
-          value={userProfile.contact}
-          onChangeText={text => setUserProfile({...userProfile, contact: text})}
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Contact</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your contact number"
+            value={userProfile.contact}
+            onChangeText={text =>
+              setUserProfile({...userProfile, contact: text})
+            }
+          />
+        </View>
 
-      {userProfile.userType === 'doctor' && (
-        <>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Location</Text>
+        {userProfile.userType === 'doctor' && (
+          <>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Location</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your location"
+                value={userProfile.location}
+                onChangeText={text =>
+                  setUserProfile({...userProfile, location: text})
+                }
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Speciality</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your speciality"
+                value={userProfile.speciality}
+                onChangeText={text =>
+                  setUserProfile({...userProfile, speciality: text})
+                }
+              />
+            </View>
+          </>
+        )}
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.subHeading}>Qualifications</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setQualificationModalVisible(true)}>
+            <Text style={styles.buttonText}>Add</Text>
+          </TouchableOpacity>
+          <FlatList
+            data={qualifications}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <View style={styles.listItem}>
+                <Text>{item.degreeName}</Text>
+                <Text>{item.institute}</Text>
+                <Text>{item.passingYear}</Text>
+              </View>
+            )}
+            ListEmptyComponent={() => <Text>No Records Found</Text>}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.subHeading}>Experiences</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setExperienceModalVisible(true)}>
+            <Text style={styles.buttonText}>Add</Text>
+          </TouchableOpacity>
+          <FlatList
+            data={experiences}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <View style={styles.listItem}>
+                <Text>{item.clinic}</Text>
+                <Text>{item.startYear}</Text>
+                <Text>{item.endYear}</Text>
+                <Text>{item.description}</Text>
+              </View>
+            )}
+            ListEmptyComponent={() => <Text>No Records Found</Text>}
+          />
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
+          <Text style={styles.buttonText}>Save Profile</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Qualification Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={qualificationModalVisible}
+        onRequestClose={() => setQualificationModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.subHeading}>Add Qualification</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your location"
-              value={userProfile.location}
-              onChangeText={text =>
-                setUserProfile({...userProfile, location: text})
-              }
+              placeholder="Degree Name"
+              value={degreeName}
+              onChangeText={text => setDegreeName(text)}
             />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Speciality</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your speciality"
-              value={userProfile.speciality}
-              onChangeText={text =>
-                setUserProfile({...userProfile, speciality: text})
-              }
+              placeholder="Institute"
+              value={institute}
+              onChangeText={text => setInstitute(text)}
             />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Qualification</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your qualification"
-              value={userProfile.qualification}
-              onChangeText={text =>
-                setUserProfile({...userProfile, qualification: text})
-              }
+              placeholder="Passing Year"
+              value={passingYear}
+              onChangeText={text => setPassingYear(text)}
             />
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleAddQualification}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setQualificationModalVisible(false)}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
+        </View>
+      </Modal>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Experience</Text>
+      {/* Experience Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={experienceModalVisible}
+        onRequestClose={() => setExperienceModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.subHeading}>Add Experience</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your experience"
-              value={userProfile.experience}
-              onChangeText={text =>
-                setUserProfile({...userProfile, experience: text})
-              }
+              placeholder="Clinic"
+              value={clinic}
+              onChangeText={text => setClinic(text)}
             />
+            <TextInput
+              style={styles.input}
+              placeholder="Start Year"
+              value={startYear}
+              onChangeText={text => setStartYear(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="End Year"
+              value={endYear}
+              onChangeText={text => setEndYear(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Description"
+              value={description}
+              onChangeText={text => setDescription(text)}
+            />
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleAddExperience}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setExperienceModalVisible(false)}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
-        </>
-      )}
-
-      <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
-        <Text style={styles.buttonText}>Save Profile</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
@@ -179,6 +376,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 24,
+  },
+  subHeading: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
   inputContainer: {
     width: '80%',
@@ -196,7 +398,34 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
+    marginBottom: 16,
     backgroundColor: '#fff',
+  },
+  addButton: {
+    backgroundColor: '#27ae60',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  cancelButton: {
+    backgroundColor: '#e74c3c',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  listItem: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
   },
   button: {
     backgroundColor: '#27ae60',
@@ -205,10 +434,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 16,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    width: '80%',
   },
 });
 
