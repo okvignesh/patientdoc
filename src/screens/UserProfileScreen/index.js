@@ -66,7 +66,7 @@ const UserProfile = () => {
         qualificationRef.onSnapshot(querySnapshot => {
           const data = [];
           querySnapshot.forEach(doc => {
-            data.push(doc.data());
+            data.push({id: doc.id, ...doc.data()});
           });
           setQualifications(data);
         });
@@ -85,7 +85,7 @@ const UserProfile = () => {
         experienceRef.onSnapshot(querySnapshot => {
           const data = [];
           querySnapshot.forEach(doc => {
-            data.push(doc.data());
+            data.push({id: doc.id, ...doc.data()});
           });
           setExperiences(data);
         });
@@ -158,6 +158,27 @@ const UserProfile = () => {
       setExperienceModalVisible(false);
     } catch (error) {
       console.error('Error adding experience:', error);
+    }
+  };
+
+  const handleDeleteQualification = async qualificationId => {
+    try {
+      console.log('Delete Qualification triggered', qualificationId);
+      await firestore()
+        .collection('Qualification')
+        .doc(qualificationId)
+        .delete();
+    } catch (error) {
+      console.error('Error deleting qualification:', error);
+    }
+  };
+
+  const handleDeleteExperience = async experienceId => {
+    try {
+      console.log('Delete Experience triggered', experienceId);
+      await firestore().collection('Experience').doc(experienceId).delete();
+    } catch (error) {
+      console.error('Error deleting experience:', error);
     }
   };
 
@@ -241,6 +262,10 @@ const UserProfile = () => {
                 <Text>{item.degreeName}</Text>
                 <Text>{item.institute}</Text>
                 <Text>{item.passingYear}</Text>
+                <TouchableOpacity
+                  onPress={() => handleDeleteQualification(item.id)}>
+                  <Text style={styles.deleteButton}>Delete</Text>
+                </TouchableOpacity>
               </View>
             )}
             ListEmptyComponent={() => <Text>No Records Found</Text>}
@@ -263,6 +288,10 @@ const UserProfile = () => {
                 <Text>{item.startYear}</Text>
                 <Text>{item.endYear}</Text>
                 <Text>{item.description}</Text>
+                <TouchableOpacity
+                  onPress={() => handleDeleteExperience(item.id)}>
+                  <Text style={styles.deleteButton}>Delete</Text>
+                </TouchableOpacity>
               </View>
             )}
             ListEmptyComponent={() => <Text>No Records Found</Text>}
@@ -445,6 +474,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     width: '80%',
+  },
+  deleteButton: {
+    color: 'red',
+    fontWeight: 'bold',
   },
 });
 
