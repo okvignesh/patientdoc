@@ -244,59 +244,59 @@ const UserProfile = () => {
                 }
               />
             </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.subHeading}>Qualifications</Text>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => setQualificationModalVisible(true)}>
+                <Text style={styles.buttonText}>Add</Text>
+              </TouchableOpacity>
+              <FlatList
+                data={qualifications}
+                keyExtractor={item => item.id}
+                renderItem={({item}) => (
+                  <View style={styles.listItem}>
+                    <Text>{item.degreeName}</Text>
+                    <Text>{item.institute}</Text>
+                    <Text>{item.passingYear}</Text>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteQualification(item.id)}>
+                      <Text style={styles.deleteButton}>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                ListEmptyComponent={() => <Text>No Records Found</Text>}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.subHeading}>Experiences</Text>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => setExperienceModalVisible(true)}>
+                <Text style={styles.buttonText}>Add</Text>
+              </TouchableOpacity>
+              <FlatList
+                data={experiences}
+                keyExtractor={item => item.id}
+                renderItem={({item}) => (
+                  <View style={styles.listItem}>
+                    <Text>{item.clinic}</Text>
+                    <Text>{item.startYear}</Text>
+                    <Text>{item.endYear}</Text>
+                    <Text>{item.description}</Text>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteExperience(item.id)}>
+                      <Text style={styles.deleteButton}>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                ListEmptyComponent={() => <Text>No Records Found</Text>}
+              />
+            </View>
           </>
         )}
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.subHeading}>Qualifications</Text>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setQualificationModalVisible(true)}>
-            <Text style={styles.buttonText}>Add</Text>
-          </TouchableOpacity>
-          <FlatList
-            data={qualifications}
-            keyExtractor={item => item.id}
-            renderItem={({item}) => (
-              <View style={styles.listItem}>
-                <Text>{item.degreeName}</Text>
-                <Text>{item.institute}</Text>
-                <Text>{item.passingYear}</Text>
-                <TouchableOpacity
-                  onPress={() => handleDeleteQualification(item.id)}>
-                  <Text style={styles.deleteButton}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-            ListEmptyComponent={() => <Text>No Records Found</Text>}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.subHeading}>Experiences</Text>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setExperienceModalVisible(true)}>
-            <Text style={styles.buttonText}>Add</Text>
-          </TouchableOpacity>
-          <FlatList
-            data={experiences}
-            keyExtractor={item => item.id}
-            renderItem={({item}) => (
-              <View style={styles.listItem}>
-                <Text>{item.clinic}</Text>
-                <Text>{item.startYear}</Text>
-                <Text>{item.endYear}</Text>
-                <Text>{item.description}</Text>
-                <TouchableOpacity
-                  onPress={() => handleDeleteExperience(item.id)}>
-                  <Text style={styles.deleteButton}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-            ListEmptyComponent={() => <Text>No Records Found</Text>}
-          />
-        </View>
 
         <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
           <Text style={styles.buttonText}>Save Profile</Text>
