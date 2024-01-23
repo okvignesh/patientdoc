@@ -36,53 +36,68 @@ const CreateAppointment = () => {
       let query = doctorsRef.where('userType', '==', 'doctor');
 
       if (searchText.length >= 1 && searchText.trim() !== '') {
-        // Check if 'speciality' starts with, contains, or equals searchText
-        query = query
+        const specialityQuery = query
           .where('speciality', '>=', searchText)
           .where('speciality', '<=', searchText + '\uf8ff');
+
+        const nameQuery = query
+          .where('name', '>=', searchText)
+          .where('name', '<=', searchText + '\uf8ff');
+
+        const locationQuery = query
+          .where('location', '>=', searchText)
+          .where('location', '<=', searchText + '\uf8ff');
+
+        const [specialityResults, nameResults, locationResults] =
+          await Promise.allSettled([
+            specialityQuery.get(),
+            nameQuery.get(),
+            locationQuery.get(),
+          ]);
+
+        const validSpecialityResults =
+          specialityResults.status === 'fulfilled'
+            ? specialityResults.value.docs
+            : [];
+
+        const validNameResults =
+          nameResults.status === 'fulfilled' ? nameResults.value.docs : [];
+
+        const validLocationResults =
+          locationResults.status === 'fulfilled'
+            ? locationResults.value.docs
+            : [];
+
+        const results = [
+          ...validSpecialityResults,
+          ...validNameResults,
+          ...validLocationResults,
+        ];
+
+        if (results && Array.isArray(results)) {
+          const uniqueResults = Array.from(new Set(results.map(a => a.id))).map(
+            id => {
+              return results.find(a => a.id === id);
+            },
+          );
+          const doctors = uniqueResults.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          setSearchResults(doctors);
+        } else {
+          // No results or not an array, return empty results
+          setSearchResults([]);
+        }
       } else {
         // No searchText, return empty results
         setSearchResults([]);
-        return;
       }
-
-      const results = await query.get();
-
-      const doctors = results.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setSearchResults(doctors);
     } catch (error) {
       console.error('Error searching for doctors:', error);
     }
   };
-
-  // const searchDoctors = async () => {
-  //   try {
-  //     // const doctorsRef = firestore().collection('UserProfile');
-  //     // const query = doctorsRef
-  //     //   .where('userType', '==', 'doctor')
-  //     //   .where('speciality', '==', searchText);
-
-  //     const doctorsRef = firestore().collection('UserProfile');
-  //     const query = doctorsRef
-  //       .where('userType', '==', 'doctor')
-  //       .where('speciality', '>=', searchText) // Check if 'speciality' is greater than or equal to searchText
-  //       .where('speciality', '<=', searchText + '\uf8ff'); // Check if 'speciality' is less than or equal to searchText + '\uf8ff'
-
-  //     const results = await query.get();
-
-  //     const doctors = results.docs.map(doc => {
-  //       return {id: doc.id, ...doc.data()};
-  //     });
-
-  //     setSearchResults(doctors);
-  //   } catch (error) {
-  //     console.error('Error searching for doctors:', error);
-  //   }
-  // };
 
   const requestAppointment = async () => {
     try {
@@ -103,8 +118,6 @@ const CreateAppointment = () => {
       });
 
       setModalVisible(false);
-      // Navigate to Dashboard or Upcoming Appointments
-      // You may implement your navigation logic here
     } catch (error) {
       console.error('Error requesting appointment:', error);
     }
@@ -134,7 +147,7 @@ const CreateAppointment = () => {
       <Text style={styles.label}>Search for Doctors</Text>
       <TextInput
         style={styles.searchInput}
-        placeholder="Search by Speciality"
+        placeholder="Search by Speciality, Name or Location"
         value={searchText}
         onChangeText={text => setSearchText(text)}
       />
