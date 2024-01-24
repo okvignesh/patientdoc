@@ -8,6 +8,8 @@ import AppointmentHistory from './AppointmentHistoryScreen';
 import CreateAppointment from './CreateNewAppointmentScreen';
 import ManageAppointments from './ManageAppointmentRequestScreen';
 
+import PubNubScreen from './PubNubScreen';
+
 export {
   LoginScreen,
   SignupScreen,
@@ -17,4 +19,5 @@ export {
   AppointmentHistory,
   CreateAppointment,
   ManageAppointments,
+  PubNubScreen,
 };

@@ -9,6 +9,7 @@ import {
   AppointmentHistory,
   CreateAppointment,
   ManageAppointments,
+  PubNubScreen,
 } from '../screens';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -182,6 +183,11 @@ const Navigator = () => {
             />
           </>
         )}
+        <Drawer.Screen
+          name="PubnubScreen"
+          component={PubNubScreen}
+          options={{drawerLabel: 'Chat'}}
+        />
       </Drawer.Navigator>
     );
   };

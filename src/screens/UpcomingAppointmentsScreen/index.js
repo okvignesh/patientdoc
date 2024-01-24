@@ -10,7 +10,7 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
-const UpcomingAppointments = ({route}) => {
+const UpcomingAppointments = ({route, navigation}) => {
   const [appointments, setAppointments] = useState([]);
   const userType = route.params.userType; // Assuming 'doctor' or 'patient'
 
@@ -44,9 +44,8 @@ const UpcomingAppointments = ({route}) => {
     return () => unsubscribe();
   }, [userType]);
 
-  const handleChat = () => {
-    // Placeholder for the chat feature (optional)
-    Alert.alert('Chat Feature under Implementation');
+  const handleChat = (user, userType) => {
+    navigation.navigate('PubnubScreen', {user, userType});
   };
 
   const renderAppointmentItem = ({item}) => (
@@ -64,7 +63,9 @@ const UpcomingAppointments = ({route}) => {
         }>{`Custom Message: ${item.customMessage}`}</Text>
       <Text style={styles.appointmentText}>{`Status: ${item.status}`}</Text>
       {item.status === 'approved' && (
-        <TouchableOpacity style={styles.chatButton} onPress={handleChat}>
+        <TouchableOpacity
+          style={styles.chatButton}
+          onPress={() => handleChat(item, userType)}>
           <Text style={styles.buttonText}>Chat</Text>
         </TouchableOpacity>
       )}
