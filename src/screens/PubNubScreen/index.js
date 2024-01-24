@@ -13,8 +13,6 @@ const pubnub = new PubNub({
 
 const PubNubScreen = ({route, navigation}) => {
   const {user, userType} = route.params;
-  console.log(user);
-  console.log(userType);
   const [chatEnded, setChatEnded] = useState(false);
 
   useEffect(() => {
@@ -32,37 +30,32 @@ const PubNubScreen = ({route, navigation}) => {
 
   return (
     <PubNubProvider client={pubnub}>
-      <Chat user={user} chatEnded={chatEnded} onEndChat={handleEndChat} />
+      <Chat
+        user={user}
+        userType={userType}
+        chatEnded={chatEnded}
+        onEndChat={handleEndChat}
+      />
     </PubNubProvider>
   );
 };
 
-function Chat({user, chatEnded, onEndChat}) {
+function Chat({user, userType, chatEnded, onEndChat}) {
   const pubnub = usePubNub();
-  function createUniqueChannelName(userId1, userId2) {
-    // Sort user IDs alphabetically
+
+  const createUniqueChannelName = (userId1, userId2) => {
     const sortedUserIds = [userId1, userId2].sort();
-
-    console.log(sortedUserIds);
-
-    // Use a separator (you can choose any character that suits your needs)
     const separator = '_';
-
-    // Concatenate sorted user IDs with the separator
     const concatenatedIds = sortedUserIds.join(separator);
-
-    console.log(concatenatedIds);
-
-    // Return the concatenated string as the unique channel name
     return concatenatedIds;
-  }
+  };
 
   const uniqueChannelName = createUniqueChannelName(
     user.doctorId,
     user.patientId,
   );
 
-  const [channels] = useState([uniqueChannelName]); //ITC
+  const [channels] = useState([uniqueChannelName]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
 
@@ -70,11 +63,18 @@ function Chat({user, chatEnded, onEndChat}) {
     try {
       const history = await pubnub.history({
         channel: channels[0],
-        count: 100, // adjust the count based on your needs
+        count: 100,
       });
 
-      const messages = history.messages.map(msg => msg.entry);
-      setMessages(messages);
+      const formattedMessages = history.messages.map(msg => {
+        const formattedMessage = {
+          ...msg.entry,
+          userType: msg.entry.userType || '',
+        };
+        return formattedMessage;
+      });
+
+      setMessages(formattedMessages);
     } catch (error) {
       console.error('Error fetching chat history:', error);
     }
@@ -87,14 +87,14 @@ function Chat({user, chatEnded, onEndChat}) {
 
       if (typeof message === 'string' || message.hasOwnProperty('text')) {
         const text = message.text || message;
-        setMessages(prevMessages => [...prevMessages, text]);
+        const formattedMessage = {text, userType: message.userType || ''};
+        setMessages(prevMessages => [...prevMessages, formattedMessage]);
       }
     };
 
     pubnub.addListener({message: handleMessage});
     pubnub.subscribe({channels});
 
-    // Fetch chat history when component mounts
     fetchChatHistory();
 
     return () => {
@@ -107,17 +107,15 @@ function Chat({user, chatEnded, onEndChat}) {
     if (message) {
       pubnub.publish({
         channel: channels[0],
-        message,
-        // storeInHistory: true, // should be true to use ttl
-        // ttl: 1, // Messages will be expired in 1 hour
+        message: {text: message, userType},
       });
       setMessage('');
     }
   };
 
   const endChat = () => {
-    onEndChat();
     pubnub.unsubscribeAll();
+    onEndChat();
   };
 
   return (
@@ -128,11 +126,54 @@ function Chat({user, chatEnded, onEndChat}) {
 
       <FlatList
         data={messages}
-        renderItem={({item, index}) => (
-          <View style={{marginVertical: 5}}>
-            <Text>{item}</Text>
-          </View>
-        )}
+        renderItem={({item, index}) => {
+          const isCurrentUserMessage = item.userType === userType;
+
+          return (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: isCurrentUserMessage
+                  ? 'flex-end'
+                  : 'flex-start',
+                marginVertical: 5,
+              }}>
+              {isCurrentUserMessage ? (
+                <>
+                  <Text style={{marginRight: 10, fontWeight: 'bold'}}>
+                    {userType === 'doctor'
+                      ? `${user.doctorName}`
+                      : `${user.patientName}`}
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: 'lightblue',
+                      borderRadius: 8,
+                      padding: 8,
+                    }}>
+                    <Text>{item.text}</Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Text style={{marginRight: 10, fontWeight: 'bold'}}>
+                    {userType === 'doctor'
+                      ? `${user.patientName}`
+                      : `${user.doctorName}`}
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: 'lightgrey',
+                      borderRadius: 8,
+                      padding: 8,
+                    }}>
+                    <Text>{item.text}</Text>
+                  </View>
+                </>
+              )}
+            </View>
+          );
+        }}
         keyExtractor={(item, index) => index.toString()}
       />
 
@@ -170,8 +211,7 @@ function Chat({user, chatEnded, onEndChat}) {
           </TouchableOpacity>
         </View>
       )}
-
-      {/* {!chatEnded && (
+      {!chatEnded && (
         <TouchableOpacity
           style={{
             marginTop: 10,
@@ -184,7 +224,7 @@ function Chat({user, chatEnded, onEndChat}) {
           onPress={endChat}>
           <Text style={{color: 'white'}}>End Chat</Text>
         </TouchableOpacity>
-      )} */}
+      )}
     </View>
   );
 }
