@@ -19,6 +19,8 @@ const CreateAppointment = () => {
   const [appmtDate, setAppmtDate] = useState('');
   const [appmtTime, setAppmtTime] = useState('');
   const [customMessage, setCustomMessage] = useState('');
+  const [viewProfileModalVisible, setViewProfileModalVisible] = useState(false);
+  const [doctorProfile, setDoctorProfile] = useState(null);
 
   useEffect(() => {
     // Debouncing search to avoid multiple queries in a short time
@@ -123,24 +125,81 @@ const CreateAppointment = () => {
     }
   };
 
+  const getDoctorDataById = async (doctorId, collectionName) => {
+    try {
+      const doctorDataRef = firestore().collection(collectionName);
+      const querySnapshot = await doctorDataRef
+        .where('uid', '==', doctorId)
+        .get();
+
+      const doctorData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return doctorData;
+    } catch (error) {
+      console.log(
+        `Error fetching ${collectionName} for doctor ID ${doctorId}:`,
+        error,
+      );
+    }
+  };
+
   const renderDoctorItem = ({item}) => (
-    <TouchableOpacity
-      style={styles.doctorItem}
-      onPress={() => setSelectedDoctor(item)}>
-      <Text style={styles.doctorName}>{item.name}</Text>
-      <Text style={styles.doctorDetails}>{item.speciality}</Text>
-      <Text style={styles.doctorDetails}>{item.location}</Text>
-      <Text style={styles.doctorDetails}>{item.contact}</Text>
+    <View>
       <TouchableOpacity
-        style={styles.appointmentButton}
-        onPress={() => {
-          setSelectedDoctor(item);
-          setModalVisible(true);
-        }}>
-        <Text style={styles.buttonText}>Request Appointment</Text>
+        style={styles.doctorItem}
+        onPress={() => setSelectedDoctor(item)}>
+        <Text style={styles.doctorName}>{item.name}</Text>
+        <Text style={styles.doctorDetails}>{item.speciality}</Text>
+        <Text style={styles.doctorDetails}>{item.location}</Text>
+        <Text style={styles.doctorDetails}>{item.contact}</Text>
+        <TouchableOpacity
+          style={styles.appointmentButton}
+          onPress={() => {
+            setSelectedDoctor(item);
+            setModalVisible(true);
+          }}>
+          <Text style={styles.buttonText}>Request Appointment</Text>
+        </TouchableOpacity>
+
+        {/* Add "View Doctor Profile" button */}
+        <TouchableOpacity
+          style={styles.appointmentButton}
+          onPress={() => viewDoctorProfile(item)}>
+          <Text style={styles.buttonText}>View Doctor Profile</Text>
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   );
+
+  // Function to fetch and display doctor's profile in the modal
+  const viewDoctorProfile = async doctor => {
+    try {
+      const userProfile = await getDoctorDataById(doctor.uid, 'UserProfile');
+      const qualifications = await getDoctorDataById(
+        doctor.uid,
+        'Qualification',
+      );
+      const experiences = await getDoctorDataById(doctor.uid, 'Experience');
+
+      const doctorProfile = {
+        userProfile,
+        qualifications,
+        experiences,
+      };
+
+      console.log(doctorProfile.userProfile);
+      console.log(doctorProfile.qualifications);
+      console.log(doctorProfile.experiences);
+
+      setDoctorProfile(doctorProfile);
+      setViewProfileModalVisible(true);
+    } catch (error) {
+      console.error('Error fetching doctor profile:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -193,6 +252,47 @@ const CreateAppointment = () => {
             style={styles.modalButton}
             onPress={() => setModalVisible(false)}>
             <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      {/* Modal to view doctor's profile */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={viewProfileModalVisible}
+        onRequestClose={() => setViewProfileModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalHeading}>Doctor's Profile</Text>
+          {/* Display doctor's profile information here */}
+          {doctorProfile && (
+            <View>
+              <Text>Name: {doctorProfile.userProfile[0]?.name}</Text>
+              <Text>
+                Speciality: {doctorProfile.userProfile[0]?.speciality}
+              </Text>
+              <Text>Contact: {doctorProfile.userProfile[0]?.contact}</Text>
+
+              {/* Display Qualifications */}
+              <Text style={styles.modalSubHeading}>Qualifications:</Text>
+              {doctorProfile.qualifications.map((qualification, index) => (
+                <Text key={index}>{qualification?.degreeName}</Text>
+              ))}
+
+              {/* Display Experiences */}
+              <Text style={styles.modalSubHeading}>Experiences:</Text>
+              {doctorProfile.experiences.map((experience, index) => (
+                <View>
+                  <Text key={index}>{experience?.clinic}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={() => setViewProfileModalVisible(false)}>
+            <Text style={styles.buttonText}>Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -277,6 +377,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 8,
     marginTop: 16,
+  },
+  modalSubHeading: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
   },
 });
 
