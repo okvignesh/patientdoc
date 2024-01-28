@@ -8,6 +8,7 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
+  Alert,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -36,10 +37,12 @@ const CreateAppointment = () => {
     setIsModalVisible(!isModalVisible);
   };
   const date = date => {
-    return moment(date).format('MMMM Do YYYY');
+    // return moment(date).format('MMMM Do YYYY');
+    return moment(date).format('DD/MM/YYYY');
   };
   const time = time => {
-    return moment(time).format('hh:mm A');
+    // return moment(time).format('hh:mm A');
+    return moment(time).format('HH:mm');
   };
 
   const openDatePicker = () => {
@@ -137,13 +140,17 @@ const CreateAppointment = () => {
         patientId: userId,
         patientName,
         doctorName: selectedDoctor.name,
-        appmtDate,
-        appmtTime,
+        appmtDate: date(currentDate),
+        appmtTime: time(date_time),
         customMessage,
         status: 'pending',
       });
 
       setModalVisible(false);
+      setCurrentDate(new Date());
+      setDate_time(new Date());
+      setCustomMessage('');
+      Alert.alert('Appointment Successfully Created and Pending for Approval');
     } catch (error) {
       console.error('Error requesting appointment:', error);
     }
@@ -184,6 +191,8 @@ const CreateAppointment = () => {
           onPress={() => {
             setSelectedDoctor(item);
             setModalVisible(true);
+            setCurrentDate(new Date());
+            setDate_time(new Date());
           }}>
           <Text style={styles.buttonText}>Request Appointment</Text>
         </TouchableOpacity>
@@ -250,12 +259,14 @@ const CreateAppointment = () => {
         <View style={styles.modalContainer}>
           <Text style={styles.modalHeading}>Request Appointment</Text>
 
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Appointment Date"
-            value={appmtDate}
-            onChangeText={text => setAppmtDate(text)}
-          />
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setStartOpen(true);
+            }}>
+            <View style={styles.modalInput2}>
+              <Text>{date(currentDate)}</Text>
+            </View>
+          </TouchableWithoutFeedback>
 
           <TouchableWithoutFeedback
             onPress={() => {
@@ -290,6 +301,15 @@ const CreateAppointment = () => {
             setCurrentDate={setDate_time}
             modal={true}
             minuteInterval={15}
+          />
+          <DatePickerModal
+            mode={'date'}
+            open={startOpen}
+            setOpen={setStartOpen}
+            currentDate={currentDate}
+            minimumDate={new Date()}
+            setCurrentDate={setCurrentDate}
+            modal={true}
           />
         </View>
       </Modal>
@@ -356,7 +376,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   doctorItem: {
-    width: '80%',
+    width: '100%',
     marginBottom: 16,
     padding: 16,
     backgroundColor: '#fff',
