@@ -261,7 +261,9 @@ const CreateAppointment = () => {
             onPress={() => {
               setEndOpen(true);
             }}>
-            <Text style={styles.modalInput}>{time(date_time)}</Text>
+            <View style={styles.modalInput2}>
+              <Text>{time(date_time)}</Text>
+            </View>
           </TouchableWithoutFeedback>
 
           <TextInput
@@ -295,7 +297,7 @@ const CreateAppointment = () => {
       {/* Modal to view doctor's profile */}
       <Modal
         animationType="slide"
-        transparent={true}
+        transparent={false}
         visible={viewProfileModalVisible}
         onRequestClose={() => setViewProfileModalVisible(false)}>
         <View style={styles.modalContainer}>
@@ -404,6 +406,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
+    marginBottom: 16,
+    backgroundColor: '#fff',
+  },
+  modalInput2: {
+    height: 40,
+    width: '80%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingTop: 10,
     marginBottom: 16,
     backgroundColor: '#fff',
   },
