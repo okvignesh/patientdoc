@@ -1,5 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
@@ -43,62 +50,80 @@ const AppointmentHistory = ({route}) => {
 
   const renderAppointmentItem = ({item}) => (
     <TouchableOpacity style={styles.appointmentItem}>
-      <Text style={styles.patientName}>{item.patientName}</Text>
-      <Text style={styles.doctorName}>{item.doctorName}</Text>
-      <Text
-        style={styles.dateTime}>{`${item.appmtDate} ${item.appmtTime}`}</Text>
-      <Text style={styles.customMessage}>{item.customMessage}</Text>
+      <Text style={styles.label}>Patient: </Text>
+      <Text style={styles.value}>{item.patientName}</Text>
+
+      <Text style={styles.label}>Doctor: </Text>
+      <Text style={styles.value}>{item.doctorName}</Text>
+
+      <Text style={styles.label}>Date & Time: </Text>
+      <Text style={styles.value}>{`${item.appmtDate} ${item.appmtTime}`}</Text>
+
+      <Text style={styles.label}>Custom Message: </Text>
+      <Text style={styles.value}>{item.customMessage}</Text>
+
+      <Text style={styles.label}>Status: </Text>
       <Text style={styles.status}>{item.status}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={appointments}
-        keyExtractor={item => item.id}
-        renderItem={renderAppointmentItem}
-        ListEmptyComponent={<Text>No appointments found</Text>}
-      />
-    </View>
+    <ImageBackground
+      source={require('../../../assets/images/background.png')} // Replace with the actual path to your background image
+      style={styles.backgroundImage}>
+      <View style={styles.container}>
+        <FlatList
+          data={appointments}
+          keyExtractor={item => item.id}
+          renderItem={renderAppointmentItem}
+          ListEmptyComponent={
+            <Text style={styles.emptyListText}>No appointments found</Text>
+          }
+        />
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover', // or 'stretch'
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent white background
   },
   appointmentItem: {
-    width: '80%',
+    width: '100%',
     marginBottom: 16,
+    marginTop: 16,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent white background
     borderRadius: 8,
   },
-  patientName: {
-    fontSize: 18,
+  label: {
+    fontSize: 16,
+    color: '#555',
     fontWeight: 'bold',
-    marginBottom: 8,
   },
-  doctorName: {
+  value: {
     fontSize: 16,
     marginBottom: 8,
-  },
-  dateTime: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  customMessage: {
-    fontSize: 16,
-    marginBottom: 8,
+    color: '#333',
   },
   status: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#27ae60', // Green color for status
+  },
+  emptyListText: {
+    color: '#fff', // White text color
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
