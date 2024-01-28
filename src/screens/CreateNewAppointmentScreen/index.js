@@ -7,9 +7,12 @@ import {
   TouchableOpacity,
   FlatList,
   Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import DatePickerModal from '../../components/DatePickerModal';
+import moment from 'moment';
 
 const CreateAppointment = () => {
   const [searchText, setSearchText] = useState('');
@@ -21,6 +24,27 @@ const CreateAppointment = () => {
   const [customMessage, setCustomMessage] = useState('');
   const [viewProfileModalVisible, setViewProfileModalVisible] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState(null);
+  const [datePickerModalVisible, setDatePickerModalVisible] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const [startOpen, setStartOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
+  const [date_time, setDate_time] = useState(new Date());
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+  const date = date => {
+    return moment(date).format('MMMM Do YYYY');
+  };
+  const time = time => {
+    return moment(time).format('hh:mm A');
+  };
+
+  const openDatePicker = () => {
+    setDatePickerModalVisible(true);
+  };
 
   useEffect(() => {
     // Debouncing search to avoid multiple queries in a short time
@@ -225,18 +249,21 @@ const CreateAppointment = () => {
         onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalHeading}>Request Appointment</Text>
+
           <TextInput
             style={styles.modalInput}
             placeholder="Appointment Date"
             value={appmtDate}
             onChangeText={text => setAppmtDate(text)}
           />
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Appointment Time"
-            value={appmtTime}
-            onChangeText={text => setAppmtTime(text)}
-          />
+
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setEndOpen(true);
+            }}>
+            <Text style={styles.modalInput}>{time(date_time)}</Text>
+          </TouchableWithoutFeedback>
+
           <TextInput
             style={styles.modalInput}
             placeholder="Custom Message"
@@ -253,6 +280,15 @@ const CreateAppointment = () => {
             onPress={() => setModalVisible(false)}>
             <Text style={styles.buttonText}>Cancel</Text>
           </TouchableOpacity>
+          <DatePickerModal
+            mode={'time'}
+            open={endOpen}
+            setOpen={setEndOpen}
+            currentDate={date_time}
+            setCurrentDate={setDate_time}
+            modal={true}
+            minuteInterval={15}
+          />
         </View>
       </Modal>
 
