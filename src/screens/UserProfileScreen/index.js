@@ -8,6 +8,7 @@ import {
   ScrollView,
   Modal,
   FlatList,
+  ImageBackground,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -183,7 +184,9 @@ const UserProfile = () => {
   };
 
   return (
-    <View contentContainerStyle={styles.container}>
+    <ImageBackground
+      source={require('../../../assets/images/background.png')}
+      style={styles.backgroundImage}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.heading}>User Profile</Text>
 
@@ -257,16 +260,20 @@ const UserProfile = () => {
                 keyExtractor={item => item.id}
                 renderItem={({item}) => (
                   <View style={styles.listItem}>
-                    <Text>{item.degreeName}</Text>
-                    <Text>{item.institute}</Text>
-                    <Text>{item.passingYear}</Text>
+                    <Text style={styles.label2}>Degree: {item.degreeName}</Text>
+                    <Text style={styles.label2}>
+                      Institute: {item.institute}
+                    </Text>
+                    <Text style={styles.label2}>
+                      Passing Year: {item.passingYear}
+                    </Text>
                     <TouchableOpacity
                       onPress={() => handleDeleteQualification(item.id)}>
                       <Text style={styles.deleteButton}>Delete</Text>
                     </TouchableOpacity>
                   </View>
                 )}
-                ListEmptyComponent={() => <Text>No Records Found</Text>}
+                ListEmptyComponent={() => <Text>No Qualifications Found</Text>}
               />
             </View>
 
@@ -282,17 +289,21 @@ const UserProfile = () => {
                 keyExtractor={item => item.id}
                 renderItem={({item}) => (
                   <View style={styles.listItem}>
-                    <Text>{item.clinic}</Text>
-                    <Text>{item.startYear}</Text>
-                    <Text>{item.endYear}</Text>
-                    <Text>{item.description}</Text>
+                    <Text style={styles.label2}>Clinic: {item.clinic}</Text>
+                    <Text style={styles.label2}>
+                      Start Year: {item.startYear}
+                    </Text>
+                    <Text style={styles.label2}>End Year: {item.endYear}</Text>
+                    <Text style={styles.label2}>
+                      Description: {item.description}
+                    </Text>
                     <TouchableOpacity
                       onPress={() => handleDeleteExperience(item.id)}>
                       <Text style={styles.deleteButton}>Delete</Text>
                     </TouchableOpacity>
                   </View>
                 )}
-                ListEmptyComponent={() => <Text>No Records Found</Text>}
+                ListEmptyComponent={() => <Text>No Experiences Found</Text>}
               />
             </View>
           </>
@@ -390,7 +401,7 @@ const UserProfile = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -399,17 +410,25 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent white background
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    justifyContent: 'center',
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginTop: 10,
     marginBottom: 24,
+    color: 'black',
   },
   subHeading: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: 'black',
   },
   inputContainer: {
     width: '80%',
@@ -419,6 +438,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
+    color: 'black',
+  },
+  label2: {
+    fontSize: 16,
+    color: 'black',
   },
   input: {
     height: 40,
@@ -462,6 +486,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 8,
     marginTop: 16,
+    marginBottom: 16,
   },
   modalContainer: {
     flex: 1,
@@ -478,6 +503,8 @@ const styles = StyleSheet.create({
   deleteButton: {
     color: 'red',
     fontWeight: 'bold',
+    fontSize: 16,
+    paddingTop: 10,
   },
 });
 
