@@ -9,6 +9,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Alert,
+  ImageBackground,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -235,135 +236,144 @@ const CreateAppointment = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Search for Doctors</Text>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search by Speciality, Name or Location"
-        value={searchText}
-        onChangeText={text => setSearchText(text)}
-      />
+    <ImageBackground
+      source={require('../../../assets/images/background.png')} // Replace with your actual background image path
+      style={styles.backgroundImage}>
+      <View style={styles.container}>
+        <Text style={styles.label}>Search for Doctors</Text>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by Speciality, Name or Location"
+          value={searchText}
+          onChangeText={text => setSearchText(text)}
+        />
 
-      <FlatList
-        data={searchResults}
-        keyExtractor={item => item.id}
-        renderItem={renderDoctorItem}
-        ListEmptyComponent={<Text>No doctors found</Text>}
-      />
+        <FlatList
+          data={searchResults}
+          keyExtractor={item => item.id}
+          renderItem={renderDoctorItem}
+          ListEmptyComponent={<Text>No doctors found</Text>}
+        />
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalHeading}>Request Appointment</Text>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalHeading}>Request Appointment</Text>
 
-          <TouchableWithoutFeedback
-            onPress={() => {
-              setStartOpen(true);
-            }}>
-            <View style={styles.modalInput2}>
-              <Text>{date(currentDate)}</Text>
-            </View>
-          </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setStartOpen(true);
+              }}>
+              <View style={styles.modalInput2}>
+                <Text>{date(currentDate)}</Text>
+              </View>
+            </TouchableWithoutFeedback>
 
-          <TouchableWithoutFeedback
-            onPress={() => {
-              setEndOpen(true);
-            }}>
-            <View style={styles.modalInput2}>
-              <Text>{time(date_time)}</Text>
-            </View>
-          </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setEndOpen(true);
+              }}>
+              <View style={styles.modalInput2}>
+                <Text>{time(date_time)}</Text>
+              </View>
+            </TouchableWithoutFeedback>
 
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Custom Message"
-            value={customMessage}
-            onChangeText={text => setCustomMessage(text)}
-          />
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={requestAppointment}>
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={() => setModalVisible(false)}>
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
-          <DatePickerModal
-            mode={'time'}
-            open={endOpen}
-            setOpen={setEndOpen}
-            currentDate={date_time}
-            setCurrentDate={setDate_time}
-            modal={true}
-            minuteInterval={15}
-          />
-          <DatePickerModal
-            mode={'date'}
-            open={startOpen}
-            setOpen={setStartOpen}
-            currentDate={currentDate}
-            minimumDate={new Date()}
-            setCurrentDate={setCurrentDate}
-            modal={true}
-          />
-        </View>
-      </Modal>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Custom Message"
+              value={customMessage}
+              onChangeText={text => setCustomMessage(text)}
+            />
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={requestAppointment}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+            <DatePickerModal
+              mode={'time'}
+              open={endOpen}
+              setOpen={setEndOpen}
+              currentDate={date_time}
+              setCurrentDate={setDate_time}
+              modal={true}
+              minuteInterval={15}
+            />
+            <DatePickerModal
+              mode={'date'}
+              open={startOpen}
+              setOpen={setStartOpen}
+              currentDate={currentDate}
+              minimumDate={new Date()}
+              setCurrentDate={setCurrentDate}
+              modal={true}
+            />
+          </View>
+        </Modal>
 
-      {/* Modal to view doctor's profile */}
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={viewProfileModalVisible}
-        onRequestClose={() => setViewProfileModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalHeading}>Doctor's Profile</Text>
-          {/* Display doctor's profile information here */}
-          {doctorProfile && (
-            <View>
-              <Text>Name: {doctorProfile.userProfile[0]?.name}</Text>
-              <Text>
-                Speciality: {doctorProfile.userProfile[0]?.speciality}
-              </Text>
-              <Text>Contact: {doctorProfile.userProfile[0]?.contact}</Text>
+        {/* Modal to view doctor's profile */}
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={viewProfileModalVisible}
+          onRequestClose={() => setViewProfileModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalHeading}>Doctor's Profile</Text>
+            {/* Display doctor's profile information here */}
+            {doctorProfile && (
+              <View>
+                <Text>Name: {doctorProfile.userProfile[0]?.name}</Text>
+                <Text>
+                  Speciality: {doctorProfile.userProfile[0]?.speciality}
+                </Text>
+                <Text>Contact: {doctorProfile.userProfile[0]?.contact}</Text>
 
-              {/* Display Qualifications */}
-              <Text style={styles.modalSubHeading}>Qualifications:</Text>
-              {doctorProfile.qualifications.map((qualification, index) => (
-                <Text key={index}>{qualification?.degreeName}</Text>
-              ))}
+                {/* Display Qualifications */}
+                <Text style={styles.modalSubHeading}>Qualifications:</Text>
+                {doctorProfile.qualifications.map((qualification, index) => (
+                  <Text key={index}>{qualification?.degreeName}</Text>
+                ))}
 
-              {/* Display Experiences */}
-              <Text style={styles.modalSubHeading}>Experiences:</Text>
-              {doctorProfile.experiences.map((experience, index) => (
-                <View>
-                  <Text key={index}>{experience?.clinic}</Text>
-                </View>
-              ))}
-            </View>
-          )}
+                {/* Display Experiences */}
+                <Text style={styles.modalSubHeading}>Experiences:</Text>
+                {doctorProfile.experiences.map((experience, index) => (
+                  <View>
+                    <Text key={index}>{experience?.clinic}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
 
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={() => setViewProfileModalVisible(false)}>
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-    </View>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setViewProfileModalVisible(false)}>
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover', // or 'stretch'
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Adjust background opacity
   },
   searchInput: {
     height: 40,

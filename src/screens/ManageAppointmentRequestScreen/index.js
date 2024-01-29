@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   StyleSheet,
+  ImageBackground,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -57,62 +58,78 @@ const ManageAppointments = () => {
     <TouchableOpacity
       style={styles.appointmentItem}
       onPress={() => {
+        // fetchUserProfile(item); // Implement
         setSelectedAppointment(item);
         setModalVisible(true);
       }}>
       <Text
-        style={styles.appointmentText}>{`Patient: ${item.patientName}`}</Text>
+        style={
+          styles.appointmentText
+        }>{`Patient Name: ${item.patientName}`}</Text>
+      {/* <Text
+        style={
+          styles.appointmentText
+        }>{`Patient Contact: ${item.contact}`}</Text>
+      <Text
+        style={styles.appointmentText}>{`Patient Email: ${item.email}`}</Text> */}
       <Text
         style={
           styles.appointmentText
         }>{`Date: ${item.appmtDate}, Time: ${item.appmtTime}`}</Text>
+      <Text style={styles.appointmentText}>Click To Approve or Reject</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={appointments}
-        keyExtractor={item => item.id}
-        renderItem={renderAppointmentItem}
-        ListEmptyComponent={<Text>No pending appointments</Text>}
-      />
+    <ImageBackground
+      source={require('../../../assets/images/background.png')}
+      style={styles.backgroundImage}>
+      <View style={styles.container}>
+        <FlatList
+          data={appointments}
+          keyExtractor={item => item.id}
+          renderItem={renderAppointmentItem}
+          ListEmptyComponent={
+            <Text style={styles.emptyListText}>No pending appointments</Text>
+          }
+        />
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalHeading}>Appointment Details</Text>
-          <Text
-            style={
-              styles.modalText
-            }>{`Patient: ${selectedAppointment?.patientName}`}</Text>
-          <Text
-            style={
-              styles.modalText
-            }>{`Date: ${selectedAppointment?.appmtDate}, Time: ${selectedAppointment?.appmtTime}`}</Text>
-          <View style={styles.modalButtons}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalHeading}>Appointment Details</Text>
+            <Text
+              style={
+                styles.modalText
+              }>{`Patient: ${selectedAppointment?.patientName}`}</Text>
+            <Text
+              style={
+                styles.modalText
+              }>{`Date: ${selectedAppointment?.appmtDate}, Time: ${selectedAppointment?.appmtTime}`}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, {backgroundColor: '#4CAF50'}]}
+                onPress={() => handleAction('approved')}>
+                <Text style={styles.buttonText}>Approve</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, {backgroundColor: '#f44336'}]}
+                onPress={() => handleAction('rejected')}>
+                <Text style={styles.buttonText}>Reject</Text>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity
-              style={[styles.modalButton, {backgroundColor: 'green'}]}
-              onPress={() => handleAction('approved')}>
-              <Text style={styles.buttonText}>Approve</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.modalButton, {backgroundColor: 'red'}]}
-              onPress={() => handleAction('rejected')}>
-              <Text style={styles.buttonText}>Reject</Text>
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}>
+              <Text style={styles.buttonText}>Close</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={() => setModalVisible(false)}>
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </ImageBackground>
   );
 };
 
@@ -121,33 +138,46 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent white background
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    justifyContent: 'center',
   },
   appointmentItem: {
-    width: '80%',
+    width: '100%',
     marginBottom: 16,
+    marginTop: 16,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 8,
   },
   appointmentText: {
     fontSize: 16,
     marginBottom: 8,
+    color: 'black',
+  },
+  emptyListText: {
+    fontSize: 16,
+    color: 'black',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   modalHeading: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: 'white',
   },
   modalText: {
     fontSize: 18,
     marginBottom: 8,
+    color: 'white',
   },
   modalButtons: {
     flexDirection: 'row',
