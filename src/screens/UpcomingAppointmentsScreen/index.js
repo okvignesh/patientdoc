@@ -4,8 +4,8 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  Alert,
   StyleSheet,
+  ImageBackground,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -49,19 +49,43 @@ const UpcomingAppointments = ({route, navigation}) => {
   };
 
   const renderAppointmentItem = ({item}) => (
-    <TouchableOpacity style={styles.appointmentItem}>
+    <TouchableOpacity
+      style={[
+        styles.appointmentItem,
+        {
+          backgroundColor: 'rgba(255, 255, 255, 0.9)', // Default White
+        },
+      ]}>
+      <Text style={styles.label}>{`Patient:`}</Text>
+      <Text style={styles.value}>{item.patientName}</Text>
+
+      <Text style={styles.label}>{`Doctor:`}</Text>
+      <Text style={styles.value}>{item.doctorName}</Text>
+
+      <Text style={styles.label}>{`Date & Time:`}</Text>
+      <Text style={styles.value}>{`${item.appmtDate} ${item.appmtTime}`}</Text>
+
+      <Text style={styles.label}>{`Custom Message:`}</Text>
+      <Text style={styles.value}>{item.customMessage}</Text>
+
+      <Text style={styles.label}>{`Status:`}</Text>
       <Text
-        style={styles.appointmentText}>{`Patient: ${item.patientName}`}</Text>
-      <Text style={styles.appointmentText}>{`Doctor: ${item.doctorName}`}</Text>
-      <Text
-        style={
-          styles.appointmentText
-        }>{`Date: ${item.appmtDate}, Time: ${item.appmtTime}`}</Text>
-      <Text
-        style={
-          styles.appointmentText
-        }>{`Custom Message: ${item.customMessage}`}</Text>
-      <Text style={styles.appointmentText}>{`Status: ${item.status}`}</Text>
+        style={[
+          styles.status,
+          {
+            color:
+              item.status === 'pending'
+                ? 'orange'
+                : item.status === 'approved'
+                ? 'green'
+                : item.status === 'rejected'
+                ? 'red'
+                : 'black',
+          },
+        ]}>
+        {item.status}
+      </Text>
+
       {item.status === 'approved' && (
         <TouchableOpacity
           style={styles.chatButton}
@@ -73,34 +97,55 @@ const UpcomingAppointments = ({route, navigation}) => {
   );
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={appointments}
-        keyExtractor={item => item.id}
-        renderItem={renderAppointmentItem}
-        ListEmptyComponent={<Text>No upcoming appointments</Text>}
-      />
-    </View>
+    <ImageBackground
+      source={require('../../../assets/images/background.png')}
+      style={styles.backgroundImage}>
+      <View style={styles.container}>
+        <FlatList
+          data={appointments}
+          keyExtractor={item => item.id}
+          renderItem={renderAppointmentItem}
+          ListEmptyComponent={
+            <Text style={styles.emptyListText}>No upcoming appointments</Text>
+          }
+        />
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover', // or 'stretch'
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent white background
   },
   appointmentItem: {
-    width: '80%',
+    width: '100%',
     marginBottom: 16,
+    marginTop: 16,
     padding: 16,
-    backgroundColor: '#fff',
     borderRadius: 8,
   },
-  appointmentText: {
+  label: {
     fontSize: 16,
     marginBottom: 8,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  value: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#333',
+  },
+  status: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   chatButton: {
     backgroundColor: '#3498db',
@@ -113,6 +158,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  emptyListText: {
+    color: '#fff', // White text color
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
